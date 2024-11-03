@@ -8,7 +8,7 @@ class LightCommand(enum.Enum):
     TOGGLE = "toggle"
     ON = "on"
     OFF = "off"
-    STATE = "state"
+    STATUS = "status"
     DISABLE_AUTOLIGHTS = "disable_autolight"
     ENABLE_AUTOLIGHTS = "enable_autolight"
 
@@ -42,22 +42,22 @@ class Light(Commandable[LightCommand], enum.Enum):
             Light.Entryway: "automation.entryway_light_on_occupancy_or_door_open",
         }.get(self, default)
 
-    def get_state(self):
-        raw_state = client.get_entity_state(self.entity_id)
-        state = {
-            "state": raw_state["state"],
-            "brightness": raw_state["attributes"].get("brightness"),
-            "color_temp": raw_state["attributes"].get("color_temp"),
+    def get_status(self):
+        raw_status = client.get_entity_status(self.entity_id)
+        status = {
+            "status": raw_status["state"],
+            "brightness": raw_status["attributes"].get("brightness"),
+            "color_temp": raw_status["attributes"].get("color_temp"),
         }
 
-        autolight_state = client.get_entity_state(self.autolight_entity_id)
-        state["autolight_state"] = autolight_state["state"]
+        autolight_status = client.get_entity_status(self.autolight_entity_id)
+        status["autolight_status"] = autolight_status["state"]
 
-        return state
+        return status
 
     def run(self, command: LightCommand):
-        if command == LightCommand.STATE:
-            print(self.get_state())
+        if command == LightCommand.STATUS:
+            print(self.get_status())
             return
 
         if command == LightCommand.ENABLE_AUTOLIGHTS:

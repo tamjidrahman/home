@@ -15,17 +15,17 @@ class Climate:
         )
 
     @staticmethod
-    def state() -> dict:
-        raw_state = client.get_entity_state(
+    def status() -> dict:
+        raw_status = client.get_entity_status(
             "climate.nest_learning_thermostat_4th_gen_thermostat"
         )
 
-        state = {
-            "temperature": raw_state["attributes"]["current_temperature"],
-            "target_temperature": raw_state["attributes"]["temperature"],
-            "mode": raw_state["state"],
+        status = {
+            "temperature": raw_status["attributes"]["current_temperature"],
+            "target_temperature": raw_status["attributes"]["temperature"],
+            "mode": raw_status["state"],
         }
 
-        print(state)
+        print(status)
 
-        return state
+        return status

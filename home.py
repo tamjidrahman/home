@@ -11,21 +11,21 @@ app = typer.Typer()
 """
 Generate a command line interface for each commandable class
 """
-for commandable_class in [Speaker, Light]:
+for i, commandable_class in enumerate([Speaker, Light]):
     commandable_class_app = typer.Typer(name=commandable_class.__name__.lower())
     for commandable in commandable_class:
         commandable_class_app.command(commandable.value)(commandable.run)
 
-    state_command = lambda: print(
+    status_command = lambda i=i: print(  # loops do not create closures, so set a dummy default (i) to force variable capture
         json.dumps(
             {
-                commandable.entity_id: commandable.get_state()
+                commandable.entity_id: commandable.get_status()
                 for commandable in commandable_class
             }
         )
     )
 
-    commandable_class_app.command("state")(state_command)
+    commandable_class_app.command("status")(status_command)
 
     app.add_typer(commandable_class_app)
 
@@ -40,3 +40,6 @@ for method in Climate.__dict__.values():
         climate_app.command()(method)
 
 app.add_typer(climate_app)
+
+if __name__ == "__main__":
+    app()

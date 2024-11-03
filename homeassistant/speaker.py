@@ -7,7 +7,7 @@ from homeassistant.client import client
 class SpeakerCommand(enum.Enum):
     PLAY = "play"
     PAUSE = "pause"
-    STATE = "state"
+    STATUS = "status"
 
     @property
     def homeassistant_commandstr(self):
@@ -27,21 +27,21 @@ class Speaker(Commandable[SpeakerCommand], enum.Enum):
     def entity_id(self):
         return f"media_player.{self.value}"
 
-    def get_state(self):
-        raw_state = client.get_entity_state(self.entity_id)
-        print(raw_state)
-        state = {
-            "state": raw_state["state"],
-            "media_title": raw_state["attributes"].get("media_title"),
-            "media_artist": raw_state["attributes"].get("media_artist"),
-            "media_album_name": raw_state["attributes"].get("media_album_name"),
-            "media_playlist": raw_state["attributes"].get("media_playlist"),
+    def get_status(self):
+        raw_status = client.get_entity_status(self.entity_id)
+        print(raw_status)
+        status = {
+            "status": raw_status["state"],
+            "media_title": raw_status["attributes"].get("media_title"),
+            "media_artist": raw_status["attributes"].get("media_artist"),
+            "media_album_name": raw_status["attributes"].get("media_album_name"),
+            "media_playlist": raw_status["attributes"].get("media_playlist"),
         }
-        return state
+        return status
 
     def run(self, command: SpeakerCommand):
-        if command == SpeakerCommand.STATE:
-            print(self.get_state())
+        if command == SpeakerCommand.STATUS:
+            print(self.get_status())
             return
         client.__call__(
             "media_player",

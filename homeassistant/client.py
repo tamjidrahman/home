@@ -11,7 +11,7 @@ class HAClient:
         self._token = token
         self.url = "http://homeassistant.local:8123/api"
 
-    def get_entity_state(self, entity_id: str):
+    def get_entity_status(self, entity_id: str):
 
         headers = {"Authorization": f"Bearer {self._token}"}
         url = f"{self.url}/states/{entity_id}"
