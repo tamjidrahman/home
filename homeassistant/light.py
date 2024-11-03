@@ -61,18 +61,18 @@ class Light(Commandable[LightCommand], enum.Enum):
             return
 
         if command == LightCommand.ENABLE_AUTOLIGHTS:
-            client.__call__(
+            client.command_service(
                 "automation", "turn_on", {"entity_id": self.autolight_entity_id}
             )
             return
 
         if command == LightCommand.DISABLE_AUTOLIGHTS:
-            client.__call__(
+            client.command_service(
                 "automation", "turn_off", {"entity_id": self.autolight_entity_id}
             )
             return
 
-        client.__call__(
+        client.command_service(
             "light", command.homeassistant_commandstr, {"entity_id": self.entity_id}
         )
 
