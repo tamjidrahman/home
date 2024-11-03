@@ -16,15 +16,7 @@ for i, commandable_class in enumerate([Speaker, Light]):
     for commandable in commandable_class:
         commandable_class_app.command(commandable.value)(commandable.run)
 
-    status_command = lambda i=i: print(  # loops do not create closures, so set a dummy default (i) to force variable capture
-        json.dumps(
-            {
-                commandable.entity_id: commandable.get_status()
-                for commandable in commandable_class
-            }
-        )
-    )
-
+    status_command = lambda i=i: print(json.dumps(commandable_class.get_status_all()))
     commandable_class_app.command("status")(status_command)
 
     app.add_typer(commandable_class_app)

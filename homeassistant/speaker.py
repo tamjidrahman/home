@@ -1,4 +1,5 @@
 import enum
+import json
 
 from commandable import Commandable
 from homeassistant import client
@@ -27,9 +28,12 @@ class Speaker(Commandable[SpeakerCommand], enum.Enum):
     def entity_id(self):
         return f"media_player.{self.value}"
 
+    @classmethod
+    def get_status_all(cls):
+        return {item.entity_id: item.get_status() for item in cls}
+
     def get_status(self):
         raw_status = client.get_entity_status(self.entity_id)
-        print(raw_status)
         status = {
             "status": raw_status["state"],
             "media_title": raw_status["attributes"].get("media_title"),
@@ -41,7 +45,7 @@ class Speaker(Commandable[SpeakerCommand], enum.Enum):
 
     def run(self, command: SpeakerCommand):
         if command == SpeakerCommand.STATUS:
-            print(self.get_status())
+            print(json.dumps(self.get_status()))
             return
         client.command_service(
             "media_player",

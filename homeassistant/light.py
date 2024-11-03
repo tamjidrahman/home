@@ -1,4 +1,5 @@
 import enum
+import json
 
 from commandable import Commandable
 from homeassistant import client
@@ -32,6 +33,10 @@ class Light(Commandable[LightCommand], enum.Enum):
     def entity_id(self):
         return f"light.{self.value}"
 
+    @classmethod
+    def get_status_all(cls):
+        return {item.entity_id: item.get_status() for item in cls}
+
     @property
     def autolight_entity_id(self):
         # kitchen and dining shares autolights
@@ -57,7 +62,7 @@ class Light(Commandable[LightCommand], enum.Enum):
 
     def run(self, command: LightCommand):
         if command == LightCommand.STATUS:
-            print(self.get_status())
+            print(json.dumps(self.get_status()))
             return
 
         if command == LightCommand.ENABLE_AUTOLIGHTS:
