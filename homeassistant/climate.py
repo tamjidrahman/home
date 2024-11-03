@@ -1,3 +1,5 @@
+import json
+
 from homeassistant import client
 
 
@@ -26,6 +28,6 @@ class Climate:
             "mode": raw_status["state"],
         }
 
-        print(status)
+        print(json.dumps(status))
 
         return status
