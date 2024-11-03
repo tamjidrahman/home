@@ -1,7 +1,7 @@
 import enum
 
 from commandable import Commandable
-from homeassistant.client import client
+from homeassistant import client
 
 
 class SpeakerCommand(enum.Enum):
@@ -43,7 +43,7 @@ class Speaker(Commandable[SpeakerCommand], enum.Enum):
         if command == SpeakerCommand.STATUS:
             print(self.get_status())
             return
-        client.__call__(
+        client.command_service(
             "media_player",
             command.homeassistant_commandstr,
             {"entity_id": self.entity_id},

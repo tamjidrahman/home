@@ -1,11 +1,11 @@
-from homeassistant.client import client
+from homeassistant import client
 
 
 class Climate:
 
     @staticmethod
     def set(temperature: float):
-        client.__call__(
+        client.command_service(
             "climate",
             "set_temperature",
             {

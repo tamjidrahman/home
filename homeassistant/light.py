@@ -1,7 +1,7 @@
 import enum
 
 from commandable import Commandable
-from homeassistant.client import client
+from homeassistant import client
 
 
 class LightCommand(enum.Enum):
