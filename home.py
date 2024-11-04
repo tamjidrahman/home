@@ -38,7 +38,7 @@ def load_config(config_file=Path.home() / ".config/home/config.toml"):
 config = load_config()
 
 """ Light"""
-light_app = typer.Typer(name="light")
+light_app = typer.Typer(name="light", help="Light commands")
 lightgroup = LightGroup(
     [Light(light["entity_id"], light["automation"]) for light in config["lights"]]
 )
@@ -49,7 +49,7 @@ for command in map(cli_wrapper, lightgroup.get_commands()):
 app.add_typer(light_app)
 
 """ Speaker"""
-speaker_app = typer.Typer(name="speaker")
+speaker_app = typer.Typer(name="speaker", help="Speaker commands")
 
 speakergroup = CommandableGroup(
     [Speaker(speaker["entity_id"]) for speaker in config["speakers"]]
@@ -62,7 +62,7 @@ for command in map(cli_wrapper, speakergroup.get_commands()):
 app.add_typer(speaker_app)
 
 """ Thermostat"""
-thermostat_app = typer.Typer(name="thermostat")
+thermostat_app = typer.Typer(name="thermostat", help="Thermostat commands")
 
 thermostat = Thermostat(config["thermostat"]["entity_id"])
 for command in map(cli_wrapper, thermostat.get_commands()):
@@ -73,7 +73,7 @@ app.add_typer(thermostat_app)
 
 
 """ Vacuum"""
-vacuum_app = typer.Typer(name="vacuum")
+vacuum_app = typer.Typer(name="vacuum", help="Vacuum commands")
 
 vacuum = Vacuum(config["vacuum"]["entity_id"])
 for command in map(cli_wrapper, vacuum.get_commands()):
