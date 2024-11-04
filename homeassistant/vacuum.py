@@ -28,6 +28,7 @@ class Vacuum(Commandable):
         return self._entity_id
 
     def status(self, verbose: bool = False) -> dict:
+        """Get status of the vacuum."""
 
         raw_status = client.get_entity_status(self.entity_id)
 
@@ -41,12 +42,15 @@ class Vacuum(Commandable):
         return status
 
     def start(self):
+        """Start the vacuum."""
         client.command_service("vacuum", "start", {"entity_id": self.entity_id})
 
     def stop(self):
+        """Stop the vacuum."""
         client.command_service("vacuum", "stop", {"entity_id": self.entity_id})
 
     def clean_room(self, rooms: list[Room]):
+        """Clean the specified rooms."""
         client.command_service(
             "dreame_vacuum",
             "vacuum_clean_segment",

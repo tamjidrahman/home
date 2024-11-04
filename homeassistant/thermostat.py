@@ -12,6 +12,7 @@ class Thermostat(Commandable):
         return self._entity_id
 
     def set(self, temperature: float):
+        """Set the temperature"""
         return client.command_service(
             "climate",
             "set_temperature",
@@ -22,6 +23,7 @@ class Thermostat(Commandable):
         )
 
     def status(self, verbose: bool = False) -> dict:
+        """Get status of the thermostat."""
         raw_status = client.get_entity_status(self.entity_id)
 
         if verbose:

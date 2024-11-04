@@ -17,6 +17,7 @@ class Speaker(Commandable):
         return self._entity_id[len("media_player.") :]
 
     def status(self, verbose: bool = False):
+        """Get status of the speaker."""
         raw_status = client.get_entity_status(self.entity_id)
 
         if verbose:
@@ -39,7 +40,9 @@ class Speaker(Commandable):
         )
 
     def play(self):
+        """Play media on the speaker."""
         self.__run("media_play")
 
     def pause(self):
+        """Pause media on the speaker."""
         self.__run("media_pause")

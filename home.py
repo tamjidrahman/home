@@ -65,7 +65,7 @@ app.add_typer(speaker_app)
 thermostat_app = typer.Typer(name="thermostat")
 
 thermostat = Thermostat(config["thermostat"]["entity_id"])
-for command in thermostat.get_commands():
+for command in map(cli_wrapper, thermostat.get_commands()):
     thermostat_app.command(command.__name__)(command)
 
 
