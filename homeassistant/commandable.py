@@ -103,7 +103,12 @@ class CommandableGroup(Commandable, ABC):
                 **kwargs,
             ):
                 for commandable in commandables:
-                    commandable.__getattribute__(commandname)(*args, **kwargs)
+
+                    return {
+                        commandable.name: commandable.__getattribute__(commandname)(
+                            *args, **kwargs
+                        )
+                    }
 
             commandfn.__name__ = commandname
             return commandfn

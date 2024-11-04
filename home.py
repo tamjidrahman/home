@@ -1,3 +1,6 @@
+import json
+from functools import wraps
+
 import typer
 
 from homeassistant.commandable import CommandableGroup
@@ -7,6 +10,21 @@ from homeassistant.thermostat import Thermostat
 from homeassistant.vacuum import Vacuum
 
 app = typer.Typer()
+
+
+def cli_wrapper(func):
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        ret = func(*args, **kwargs)
+
+        if ret is not None:
+            typer.echo(json.dumps(ret))
+
+        return ret
+
+    return wrapper
+
 
 """ Light"""
 light_app = typer.Typer(name="light")
@@ -20,7 +38,7 @@ lightgroup = CommandableGroup(
     ]
 )
 
-for command in lightgroup.get_commands():
+for command in map(cli_wrapper, lightgroup.get_commands()):
     light_app.command()(command)
 
 app.add_typer(light_app)
@@ -38,7 +56,7 @@ speakergroup = CommandableGroup(
 )
 
 
-for command in speakergroup.get_commands():
+for command in map(cli_wrapper, speakergroup.get_commands()):
     speaker_app.command()(command)
 
 app.add_typer(speaker_app)
@@ -58,7 +76,7 @@ app.add_typer(thermostat_app)
 vacuum_app = typer.Typer(name="vacuum")
 
 vacuum = Vacuum("vacuum.x40_ultra")
-for command in vacuum.get_commands():
+for command in map(cli_wrapper, vacuum.get_commands()):
     vacuum_app.command(command.__name__)(command)
 
 

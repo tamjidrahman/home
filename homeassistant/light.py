@@ -37,21 +37,23 @@ class Light(Commandable):
         return status
 
     def toggle(self):
-        client.command_service("light", "toggle", {"entity_id": self.entity_id})
+        return client.command_service("light", "toggle", {"entity_id": self.entity_id})
 
     def on(self):
-        client.command_service("light", "turn_on", {"entity_id": self.entity_id})
+        return client.command_service("light", "turn_on", {"entity_id": self.entity_id})
 
     def off(self):
-        client.command_service("light", "turn_off", {"entity_id": self.entity_id})
+        return client.command_service(
+            "light", "turn_off", {"entity_id": self.entity_id}
+        )
 
     def enable_autolights(self):
-        client.command_service(
+        return client.command_service(
             "automation", "turn_on", {"entity_id": self.autolight_entity_id}
         )
 
     def disable_autolights(self):
-        client.command_service(
+        return client.command_service(
             "automation", "turn_off", {"entity_id": self.autolight_entity_id}
         )
 
