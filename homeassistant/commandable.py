@@ -74,12 +74,6 @@ class CommandableGroup(Commandable, ABC):
     def entity_id(self) -> str:
         return ",".join(commandable.entity_id for commandable in self.commandables)
 
-    def status(self, verbose: bool = False) -> dict:
-        return {
-            commandable.entity_id: commandable.status(verbose=verbose)
-            for commandable in self.commandables
-        }
-
     def get_commands(self) -> Iterable[Callable]:
         commandable_name = type(self.commandables[0]).__name__.lower()
         commands = []
@@ -98,17 +92,19 @@ class CommandableGroup(Commandable, ABC):
                         f"--{commandable_name}",
                         click_type=self.ClickChoiceType(),
                     ),
-                ],
+                ] = [],
                 *args,
                 **kwargs,
             ):
-                for commandable in commandables:
+                if not commandables:
+                    commandables = self.commandables
 
-                    return {
-                        commandable.name: commandable.__getattribute__(commandname)(
-                            *args, **kwargs
-                        )
-                    }
+                return {
+                    commandable.name: commandable.__getattribute__(commandname)(
+                        *args, **kwargs
+                    )
+                    for commandable in commandables
+                }
 
             commandfn.__name__ = commandname
             return commandfn
