@@ -12,6 +12,11 @@ class Light(Commandable):
     def entity_id(self):
         return self._entity_id
 
+    @property
+    def name(self):
+        # override readable name to exclude "light." prefix
+        return self._entity_id[len("light.") :]
+
     def status(self, verbose: bool = False):
         raw_status = client.get_entity_status(self.entity_id)
 

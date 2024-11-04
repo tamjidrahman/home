@@ -11,6 +11,11 @@ class Speaker(Commandable):
     def entity_id(self):
         return self._entity_id
 
+    @property
+    def name(self):
+        # override readable name to exclude "media_player." prefix
+        return self._entity_id[len("media_player.") :]
+
     def status(self, verbose: bool = False):
         raw_status = client.get_entity_status(self.entity_id)
         status = {

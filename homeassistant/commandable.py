@@ -22,6 +22,11 @@ class Commandable(ABC):
         """
         pass
 
+    @property
+    def name(self) -> str:
+        """Name of entity"""
+        return self.entity_id
+
     def status(self, verbose: bool = False) -> dict:
         """
         Get state of the entity
@@ -57,7 +62,7 @@ class CommandableGroup(Commandable, ABC):
     def __init__(self, commandables: list[Commandable]):
         self.commandables = commandables
         self.choice_map = {
-            commandable.entity_id: commandable for commandable in self.commandables
+            commandable.name: commandable for commandable in self.commandables
         }
 
     def ClickChoiceType(self):
