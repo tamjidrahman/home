@@ -4,6 +4,7 @@ from homeassistant.commandable import CommandableGroup
 from homeassistant.light import Light
 from homeassistant.speaker import Speaker
 from homeassistant.thermostat import Thermostat
+from homeassistant.vacuum import Vacuum
 
 app = typer.Typer()
 
@@ -52,6 +53,16 @@ for command in thermostat.get_commands():
 
 app.add_typer(thermostat_app)
 
+
+""" Vacuum"""
+vacuum_app = typer.Typer(name="vacuum")
+
+vacuum = Vacuum("vacuum.x40_ultra")
+for command in vacuum.get_commands():
+    vacuum_app.command(command.__name__)(command)
+
+
+app.add_typer(vacuum_app)
 
 if __name__ == "__main__":
     app()
