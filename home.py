@@ -1,6 +1,8 @@
 import json
 from functools import wraps
+from pathlib import Path
 
+import toml
 import typer
 
 from homeassistant.commandable import CommandableGroup
@@ -26,16 +28,19 @@ def cli_wrapper(func):
     return wrapper
 
 
+def load_config(config_file="config.toml"):
+    config_path = Path(config_file)
+    if not config_path.exists():
+        raise FileNotFoundError(f"Configuration file {config_file} not found.")
+    return toml.load(config_path)
+
+
+config = load_config()
+
 """ Light"""
 light_app = typer.Typer(name="light")
 lightgroup = CommandableGroup(
-    [
-        Light("light.living_room", "automation.kitchen_dining_automated_lights"),
-        Light("light.kitchen", "automation.kitchen_dining_automated_lights"),
-        Light("light.dining_room", "automation.kitchen_dining_automated_lights"),
-        Light("light.bedroom", "automation.entryway_light_on_occupancy_or_door_open"),
-        Light("light.entryway", "automation.entryway_light_on_occupancy_or_door_open"),
-    ]
+    [Light(light["entity_id"], light["automation"]) for light in config["lights"]]
 )
 
 for command in map(cli_wrapper, lightgroup.get_commands()):
@@ -47,12 +52,7 @@ app.add_typer(light_app)
 speaker_app = typer.Typer(name="speaker")
 
 speakergroup = CommandableGroup(
-    [
-        Speaker("media_player.living_room"),
-        Speaker("media_player.dining_room"),
-        Speaker("media_player.kitchen"),
-        Speaker("media_player.office"),
-    ]
+    [Speaker(speaker["entity_id"]) for speaker in config["speakers"]]
 )
 
 
@@ -61,10 +61,10 @@ for command in map(cli_wrapper, speakergroup.get_commands()):
 
 app.add_typer(speaker_app)
 
-""" Themostat"""
+""" Thermostat"""
 thermostat_app = typer.Typer(name="thermostat")
 
-thermostat = Thermostat("climate.nest_learning_thermostat_4th_gen_thermostat")
+thermostat = Thermostat(config["thermostat"]["entity_id"])
 for command in thermostat.get_commands():
     thermostat_app.command(command.__name__)(command)
 
@@ -75,7 +75,7 @@ app.add_typer(thermostat_app)
 """ Vacuum"""
 vacuum_app = typer.Typer(name="vacuum")
 
-vacuum = Vacuum("vacuum.x40_ultra")
+vacuum = Vacuum(config["vacuum"]["entity_id"])
 for command in map(cli_wrapper, vacuum.get_commands()):
     vacuum_app.command(command.__name__)(command)
 

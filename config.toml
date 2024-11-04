@@ -1,0 +1,41 @@
+# Light configurations
+[[lights]]
+entity_id = "light.living_room"
+automation = "automation.living_room_lights_on_occupancy"
+
+[[lights]]
+entity_id = "light.kitchen"
+automation = "automation.kitchen_dining_automated_lights"
+
+[[lights]]
+entity_id = "light.dining_room"
+automation = "automation.kitchen_dining_automated_lights"
+
+[[lights]]
+entity_id = "light.bedroom"
+automation = "automation.bedroom_lights_on_occupancy"
+
+[[lights]]
+entity_id = "light.entryway"
+automation = "automation.entryway_light_on_occupancy_or_door_open"
+
+# Speaker configurations
+[[speakers]]
+entity_id = "media_player.living_room"
+
+[[speakers]]
+entity_id = "media_player.dining_room"
+
+[[speakers]]
+entity_id = "media_player.kitchen"
+
+[[speakers]]
+entity_id = "media_player.office"
+
+# Thermostat configuration
+[thermostat]
+entity_id = "climate.nest_learning_thermostat_4th_gen_thermostat"
+
+# Vacuum configuration
+[vacuum]
+entity_id = "vacuum.x40_ultra"
