@@ -38,15 +38,6 @@ class Vacuum(Commandable):
     def stop(self):
         client.command_service("vacuum", "stop", {"entity_id": self.entity_id})
 
-    def get_room_ids(self):
-        map = self.status(verbose=False)["attributes"]["rooms"]["Map 1"]
-
-        ids = {}
-
-        for room in map:
-            ids[room["name"]] = room["id"]
-        print(ids)
-
     def clean_room(self, rooms: list[Room]):
         client.command_service(
             "dreame_vacuum",

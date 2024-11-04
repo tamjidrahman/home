@@ -35,6 +35,8 @@ class Commandable(ABC):
 
     def get_commands(self) -> Iterable[Callable]:
         for methodname in self.__dir__():
+            if methodname == "get_commands":
+                continue
             method = self.__getattribute__(methodname)
             if (
                 callable(method)
