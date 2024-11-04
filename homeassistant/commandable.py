@@ -80,12 +80,11 @@ class CommandableGroup(Commandable, ABC):
 
     def get_commands(self) -> Iterable[Callable]:
         commandable_name = type(self.commandables[0]).__name__.lower()
-        for commandname in [
-            command.__name__ for command in self.commandables[0].get_commands()
-        ]:
-            if commandname == "get_commands":
-                continue
+        commands = []
 
+        # use a factory function to capture new functions in a loop
+        # https://stackoverflow.com/questions/1107210/python-create-function-in-a-loop-capturing-the-loop-variable
+        def cmdfnfactory(commandname):
             reference_method = self.commandables[0].__getattribute__(commandname)
 
             @merge_args(reference_method, drop_args=["self"])
@@ -98,7 +97,6 @@ class CommandableGroup(Commandable, ABC):
                         click_type=self.ClickChoiceType(),
                     ),
                 ],
-                commandname=commandname,  # set default commandname to force variable capture in list
                 *args,
                 **kwargs,
             ):
@@ -106,5 +104,13 @@ class CommandableGroup(Commandable, ABC):
                     commandable.__getattribute__(commandname)(*args, **kwargs)
 
             commandfn.__name__ = commandname
+            return commandfn
 
-            yield commandfn
+        for commandname in [
+            command.__name__ for command in self.commandables[0].get_commands()
+        ]:
+            if commandname == "get_commands":
+                continue
+            commands.append(cmdfnfactory(commandname))
+
+        return commands
