@@ -7,7 +7,7 @@ from homeassistant.thermostat import Thermostat
 
 app = typer.Typer()
 
-""" Light V2"""
+""" Light"""
 light_app = typer.Typer(name="light")
 lightgroup = CommandableGroup(
     [
@@ -24,7 +24,7 @@ for command in lightgroup.get_commands():
 
 app.add_typer(light_app)
 
-""" Speaker V2"""
+""" Speaker"""
 speaker_app = typer.Typer(name="speaker")
 
 speakergroup = CommandableGroup(
@@ -42,7 +42,7 @@ for command in speakergroup.get_commands():
 
 app.add_typer(speaker_app)
 
-""" Themostat V2"""
+""" Themostat"""
 thermostat_app = typer.Typer(name="thermostat")
 
 thermostat = Thermostat()
