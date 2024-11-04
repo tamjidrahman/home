@@ -1,5 +1,5 @@
 from homeassistant import client
-from homeassistant.commandable import Commandable, CommandableGroup
+from homeassistant.commandable import Commandable
 
 
 class Light(Commandable):
