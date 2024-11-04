@@ -74,6 +74,9 @@ class CommandableGroup(Commandable, ABC):
     def entity_id(self) -> str:
         return ",".join(commandable.entity_id for commandable in self.commandables)
 
+    def group_commands(self) -> Iterable[Callable]:
+        return []
+
     def get_commands(self) -> Iterable[Callable]:
         commandable_name = type(self.commandables[0]).__name__.lower()
         commands = []
@@ -116,4 +119,4 @@ class CommandableGroup(Commandable, ABC):
                 continue
             commands.append(cmdfnfactory(commandname))
 
-        return commands
+        return self.group_commands() + commands

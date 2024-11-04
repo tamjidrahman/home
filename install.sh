@@ -12,4 +12,9 @@ echo "Created ~/.config/home/config.toml"
 # Make the script executable
 chmod +x ~/.local/bin/home
 
+home --install-completion
+echo "Installed shell completions"
+
 echo "Installation complete. The 'home' app is now available in ~/.local/bin. Config loaded to ~/.config/home/config.toml"
+
+

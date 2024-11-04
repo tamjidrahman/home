@@ -6,7 +6,7 @@ import toml
 import typer
 
 from homeassistant.commandable import CommandableGroup
-from homeassistant.light import Light
+from homeassistant.light import Light, LightGroup
 from homeassistant.speaker import Speaker
 from homeassistant.thermostat import Thermostat
 from homeassistant.vacuum import Vacuum
@@ -39,7 +39,7 @@ config = load_config()
 
 """ Light"""
 light_app = typer.Typer(name="light")
-lightgroup = CommandableGroup(
+lightgroup = LightGroup(
     [Light(light["entity_id"], light["automation"]) for light in config["lights"]]
 )
 
