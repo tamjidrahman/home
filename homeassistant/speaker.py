@@ -1,38 +1,17 @@
-import enum
-import json
-
-from commandable import Commandable
 from homeassistant import client
+from homeassistant.commandable import Commandable
 
 
-class SpeakerCommand(enum.Enum):
-    PLAY = "play"
-    PAUSE = "pause"
-    STATUS = "status"
+class Speaker(Commandable):
 
-    @property
-    def homeassistant_commandstr(self):
-        return {
-            SpeakerCommand.PLAY: "media_play",
-            SpeakerCommand.PAUSE: "media_pause",
-        }[self]
-
-
-class Speaker(Commandable[SpeakerCommand], enum.Enum):
-    LivingRoom = "living_room"
-    DiningRoom = "dining_room"
-    Kitchen = "kitchen"
-    Office = "office"
+    def __init__(self, entity_id):
+        self._entity_id = entity_id
 
     @property
     def entity_id(self):
-        return f"media_player.{self.value}"
+        return self._entity_id
 
-    @classmethod
-    def get_status_all(cls):
-        return {item.entity_id: item.get_status() for item in cls}
-
-    def get_status(self):
+    def status(self, verbose: bool = False):
         raw_status = client.get_entity_status(self.entity_id)
         status = {
             "status": raw_status["state"],
@@ -43,12 +22,15 @@ class Speaker(Commandable[SpeakerCommand], enum.Enum):
         }
         return status
 
-    def run(self, command: SpeakerCommand):
-        if command == SpeakerCommand.STATUS:
-            print(json.dumps(self.get_status()))
-            return
+    def __run(self, command: str):
         client.command_service(
             "media_player",
-            command.homeassistant_commandstr,
+            command,
             {"entity_id": self.entity_id},
         )
+
+    def play(self):
+        self.__run("media_play")
+
+    def pause(self):
+        self.__run("media_pause")
