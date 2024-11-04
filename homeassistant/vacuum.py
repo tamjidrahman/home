@@ -1,5 +1,4 @@
 import enum
-import json
 
 import homeassistant.client as client
 from homeassistant.commandable import Commandable
@@ -29,8 +28,17 @@ class Vacuum(Commandable):
         return self._entity_id
 
     def status(self, verbose: bool = False) -> dict:
-        print(json.dumps(client.get_entity_status(self.entity_id)))
-        return client.get_entity_status(self.entity_id)
+
+        raw_status = client.get_entity_status(self.entity_id)
+
+        if verbose:
+            return raw_status
+
+        status = {
+            "status": raw_status["state"],
+        }
+
+        return status
 
     def start(self):
         client.command_service("vacuum", "start", {"entity_id": self.entity_id})

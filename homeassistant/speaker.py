@@ -18,6 +18,10 @@ class Speaker(Commandable):
 
     def status(self, verbose: bool = False):
         raw_status = client.get_entity_status(self.entity_id)
+
+        if verbose:
+            return raw_status
+
         status = {
             "status": raw_status["state"],
             "media_title": raw_status["attributes"].get("media_title"),
