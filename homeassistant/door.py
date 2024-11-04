@@ -26,7 +26,7 @@ class Door(Commandable):
             return raw_status
 
         status = {
-            "state": "closed" if raw_status["state"] is "off" else "open",
+            "state": "closed" if raw_status["state"] == "off" else "open",
         }
 
         if self.lock_id:
