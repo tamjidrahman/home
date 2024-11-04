@@ -1,3 +1,4 @@
+import itertools
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
 from typing import Annotated
@@ -119,4 +120,4 @@ class CommandableGroup(Commandable, ABC):
                 continue
             commands.append(cmdfnfactory(commandname))
 
-        return self.group_commands() + commands
+        return itertools.chain(self.group_commands(), commands)
