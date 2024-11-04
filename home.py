@@ -6,6 +6,7 @@ import toml
 import typer
 
 from homeassistant.commandable import CommandableGroup
+from homeassistant.door import Door
 from homeassistant.light import Light, LightGroup
 from homeassistant.speaker import Speaker
 from homeassistant.thermostat import Thermostat
@@ -81,6 +82,17 @@ for command in map(cli_wrapper, vacuum.get_commands()):
 
 
 app.add_typer(vacuum_app)
+
+""" Doors"""
+door_app = typer.Typer(name="door", help="Door commands")
+doorgroup = CommandableGroup(
+    [Door(door["entity_id"], lock_id=door.get("lock_id")) for door in config["doors"]]
+)
+
+for command in map(cli_wrapper, doorgroup.get_commands()):
+    door_app.command(command.__name__)(command)
+
+app.add_typer(door_app)
 
 if __name__ == "__main__":
     app()

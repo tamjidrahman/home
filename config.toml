@@ -39,3 +39,12 @@ entity_id = "climate.nest_learning_thermostat_4th_gen_thermostat"
 # Vacuum configuration
 [vacuum]
 entity_id = "vacuum.x40_ultra"
+
+
+[[doors]]
+entity_id = "binary_sensor.back_door_sensor"
+lock_id = "lock.aqara_smart_lock_u200_lock"
+
+[[doors]]
+entity_id = "binary_sensor.front_door_sensor"
+
