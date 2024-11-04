@@ -4,9 +4,12 @@ from homeassistant.commandable import Commandable
 
 class Thermostat(Commandable):
 
+    def __init__(self, entity_id):
+        self._entity_id = entity_id
+
     @property
     def entity_id(self):
-        return "climate.nest_learning_thermostat_4th_gen_thermostat"
+        return self._entity_id
 
     def set(self, temperature: float):
         return client.command_service(

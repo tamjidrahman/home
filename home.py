@@ -64,7 +64,7 @@ app.add_typer(speaker_app)
 """ Themostat"""
 thermostat_app = typer.Typer(name="thermostat")
 
-thermostat = Thermostat()
+thermostat = Thermostat("climate.nest_learning_thermostat_4th_gen_thermostat")
 for command in thermostat.get_commands():
     thermostat_app.command(command.__name__)(command)
 
