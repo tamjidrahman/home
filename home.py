@@ -28,7 +28,7 @@ def cli_wrapper(func):
     return wrapper
 
 
-def load_config(config_file="config.toml"):
+def load_config(config_file=Path.home() / ".config/home/config.toml"):
     config_path = Path(config_file)
     if not config_path.exists():
         raise FileNotFoundError(f"Configuration file {config_file} not found.")
