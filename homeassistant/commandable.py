@@ -1,3 +1,4 @@
+import concurrent.futures
 import itertools
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
@@ -103,12 +104,19 @@ class CommandableGroup(Commandable, ABC):
                 if not commandables:
                     commandables = self.commandables
 
-                return {
-                    commandable.name: commandable.__getattribute__(commandname)(
-                        *args, **kwargs
-                    )
-                    for commandable in commandables
-                }
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    futures = {
+                        executor.submit(
+                            commandable.__getattribute__(commandname),
+                            *args,
+                            **kwargs,
+                        ): commandable.name
+                        for commandable in commandables
+                    }
+                    return {
+                        futures[future]: future.result()
+                        for future in concurrent.futures.as_completed(futures)
+                    }
 
             commandfn.__name__ = commandname
             return commandfn
