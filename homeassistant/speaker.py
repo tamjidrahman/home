@@ -47,6 +47,33 @@ class Speaker(Commandable):
         """Pause media on the speaker."""
         self.__run("media_pause")
 
+    def next(self):
+        """Play next track on the speaker."""
+        self.__run("media_next_track")
+
+    def previous(self):
+        """Play next track on the speaker."""
+        self.__run("media_previous_track")
+
+    def volume_up(self):
+        """Raise volume of the speaker."""
+        self.__run("volume_up")
+
+    def volume_down(self):
+        """Lower volume of the speaker."""
+        self.__run("volume_down")
+
+    def volume_set(self, volume: int):
+        """Set volume of the speaker."""
+        return client.command_service(
+            "media_player",
+            "volume_set",
+            {
+                "entity_id": self.entity_id,
+                "volume_level": volume / 100,
+            },
+        )
+
 
 class SpeakerGroup(CommandableGroup):
     def join_speakers(self):
