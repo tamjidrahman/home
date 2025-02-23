@@ -8,7 +8,7 @@ import typer
 from homeassistant.commandable import CommandableGroup
 from homeassistant.door import Door
 from homeassistant.light import Light, LightGroup
-from homeassistant.speaker import Speaker
+from homeassistant.speaker import Speaker, SpeakerGroup
 from homeassistant.thermostat import Thermostat
 from homeassistant.vacuum import Vacuum
 
@@ -16,7 +16,6 @@ app = typer.Typer()
 
 
 def cli_wrapper(func):
-
     @wraps(func)
     def wrapper(*args, **kwargs):
         ret = func(*args, **kwargs)
@@ -52,7 +51,7 @@ app.add_typer(light_app)
 """ Speaker"""
 speaker_app = typer.Typer(name="speaker", help="Speaker commands")
 
-speakergroup = CommandableGroup(
+speakergroup = SpeakerGroup(
     [Speaker(speaker["entity_id"]) for speaker in config["speakers"]]
 )
 

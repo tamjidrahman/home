@@ -1,9 +1,9 @@
+from typing import Callable, Iterable
 from homeassistant import client
-from homeassistant.commandable import Commandable
+from homeassistant.commandable import Commandable, CommandableGroup
 
 
 class Speaker(Commandable):
-
     def __init__(self, entity_id):
         self._entity_id = entity_id
 
@@ -46,3 +46,24 @@ class Speaker(Commandable):
     def pause(self):
         """Pause media on the speaker."""
         self.__run("media_pause")
+
+
+class SpeakerGroup(CommandableGroup):
+    def join_speakers(self):
+        """Enable sleep mode for adaptive lighting"""
+        return client.command_service(
+            "script",
+            "turn_on",
+            {"entity_id": "script.join_speakers"},
+        )
+
+    def unjoin_speakers(self):
+        """Disable sleep mode for adaptive lighting"""
+        return client.command_service(
+            "script",
+            "turn_on",
+            {"entity_id": "script.unjoin_speakers"},
+        )
+
+    def group_commands(self) -> Iterable[Callable]:
+        return [self.join_speakers, self.unjoin_speakers]
