@@ -33,6 +33,7 @@ class Speaker(Commandable):
         return status
 
     def __run(self, command: str):
+        """Execute a media player command on the speaker."""
         client.command_service(
             "media_player",
             command,
@@ -54,6 +55,10 @@ class Speaker(Commandable):
     def previous(self):
         """Play next track on the speaker."""
         self.__run("media_previous_track")
+
+    def stop(self):
+        """Play next track on the speaker."""
+        self.__run("media_stop")
 
     def volume_up(self):
         """Raise volume of the speaker."""
