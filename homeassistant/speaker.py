@@ -82,7 +82,7 @@ class Speaker(Commandable):
 
 class SpeakerGroup(CommandableGroup):
     def join_speakers(self):
-        """Enable sleep mode for adaptive lighting"""
+        """Join speakers"""
         return client.command_service(
             "script",
             "turn_on",
@@ -90,7 +90,7 @@ class SpeakerGroup(CommandableGroup):
         )
 
     def unjoin_speakers(self):
-        """Disable sleep mode for adaptive lighting"""
+        """Unjoin speakers"""
         return client.command_service(
             "script",
             "turn_on",
