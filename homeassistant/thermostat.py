@@ -3,13 +3,17 @@ from homeassistant.commandable import Commandable
 
 
 class Thermostat(Commandable):
-
     def __init__(self, entity_id):
         self._entity_id = entity_id
 
     @property
     def entity_id(self):
         return self._entity_id
+
+    @property
+    def name(self):
+        # override readable name
+        return "thermostat"
 
     def set(self, temperature: float):
         """Set the temperature"""

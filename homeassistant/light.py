@@ -5,7 +5,6 @@ from homeassistant.commandable import Commandable, CommandableGroup
 
 
 class Light(Commandable):
-
     def __init__(self, entity_id, autolight_entity_id):
         self._entity_id = entity_id
         self.autolight_entity_id = autolight_entity_id
@@ -103,7 +102,6 @@ class Light(Commandable):
 
 
 class LightGroup(CommandableGroup):
-
     def enable_sleepmode(self):
         """Enable sleep mode for adaptive lighting"""
         return client.command_service(

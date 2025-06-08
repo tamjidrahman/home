@@ -79,6 +79,21 @@ class Speaker(Commandable):
             },
         )
 
+    def volume_mute(self, mute: bool = True):
+        """Mute or unmute the speaker.
+
+        Args:
+            mute: True to mute, False to unmute. Defaults to True.
+        """
+        return client.command_service(
+            "media_player",
+            "volume_mute",
+            {
+                "entity_id": self.entity_id,
+                "is_volume_muted": mute,
+            },
+        )
+
 
 class SpeakerGroup(CommandableGroup):
     def join_speakers(self):
