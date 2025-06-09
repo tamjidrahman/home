@@ -14,8 +14,8 @@ from homeassistant.vacuum import Vacuum
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Frontend URL (Next.js dev server)
-    allow_credentials=True,
+    allow_origins=["*"],  # Frontend URL (Next.js dev server)
+    allow_credentials=False,
     allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc)
     allow_headers=["*"],  # Allow all headers (e.g. Authorization, Content-Type)
 )

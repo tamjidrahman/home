@@ -1,4 +1,3 @@
-#!/bin/bash
 poetry install
 
 # Copy main.py to ~/.local/bin/homeassistant-cli
@@ -16,5 +15,3 @@ home --install-completion
 echo "Installed shell completions"
 
 echo "Installation complete. The 'home' app is now available in ~/.local/bin. Config loaded to ~/.config/home/config.toml"
-
-
