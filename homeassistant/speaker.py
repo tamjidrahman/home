@@ -93,6 +93,9 @@ class Speaker(Commandable):
                 "is_volume_muted": mute,
             },
         )
+    
+    def volume_unmute(self):
+        return self.volume_mute(mute=False)
 
 
 class SpeakerGroup(CommandableGroup):
