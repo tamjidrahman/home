@@ -46,7 +46,7 @@ export function LightCard({
               checked={localAuto === "on"}
               onCheckedChange={(checked) => {
                 setLocalAuto(checked ? "on" : "off")
-                invokeCommand("light", checked ? "autoon" : "autooff", [name]).finally(refresh)
+                invokeCommand("light", checked ? "enable_autolights" : "disable_autolights", [name]).finally(refresh)
               }}
             />
           </div>

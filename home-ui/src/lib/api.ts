@@ -5,11 +5,28 @@ export async function fetchDeviceStatus(type: string, names?: string[]) {
   return res.json();
 }
 
-export async function invokeCommand(type: string, command: string, names?: string[]) {
-  const params = names?.length ? `?${type}=${names.join(",")}` : "";
-  const res = await fetch(`https://api.basha.cloud/${type}/${command}${params}`, {
-    method: "POST"
+export async function invokeCommand(
+  type: string,
+  command: string,
+  names?: string[],
+  params: Record<string, string | number | boolean> = {}
+) {
+  const query = new URLSearchParams();
+
+  // Add the device names (e.g., light=living_room,office)
+  if (names?.length) {
+    query.set(type, names.join(","));
+  }
+
+  // Add additional arbitrary params
+  for (const [key, value] of Object.entries(params)) {
+    query.set(key, String(value));
+  }
+
+  const res = await fetch(`https://api.basha.cloud/${type}/${command}?${query.toString()}`, {
+    method: "POST",
   });
+
   if (!res.ok) throw new Error(`Failed to invoke ${command}`);
   return res.json();
 }
