@@ -25,7 +25,8 @@ class Speaker(Commandable):
 
         status = {
             "status": raw_status["state"],
-            "raw_status": raw_status,
+            "is_muted": raw_status["attributes"].get("is_volume_muted"),
+            "volume": raw_status["attributes"].get("volume_level"),
             "media_title": raw_status["attributes"].get("media_title"),
             "media_artist": raw_status["attributes"].get("media_artist"),
             "media_album_name": raw_status["attributes"].get("media_album_name"),
