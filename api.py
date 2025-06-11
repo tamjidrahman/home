@@ -1,6 +1,7 @@
 import json
+import inspect
 from pathlib import Path
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
 import toml
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -31,35 +32,67 @@ def load_config(config_file=Path.home() / ".config/home/config.toml"):
 config = load_config()
 
 
+from makefun import create_function, with_signature
+
 def register_routes(entity_name: str, devices, app: FastAPI):
     device_lookup = {device.name: device for device in devices}
-    commands = [cmd.__name__ for cmd in devices[0].get_commands()]  # assume uniform
+    commands = [cmd for cmd in devices[0].get_commands()]  # assume uniform
 
-    # Register the commands endpoint
     @app.get(f"/{entity_name}/commands")
     def get_commands():
-        return commands
+        return [cmd.__name__ for cmd in commands]
 
-    # Register each command route
-    for cmd_name in commands:
+    for cmd in commands:
+        cmd_name = cmd.__name__
         route = f"/{entity_name}/{cmd_name}"
+        sig = inspect.signature(cmd)
 
-        def make_handler(cmd):
-            def handler(names: list[str] | None = Query(None, alias=entity_name)):
-                selected = (
-                    [device_lookup[name] for name in names if name in device_lookup]
-                    if names
-                    else device_lookup.values()
+        parameters = [
+            inspect.Parameter(
+                name="names",
+                kind=inspect.Parameter.KEYWORD_ONLY,
+                default=Query(None, alias=entity_name),
+                annotation=list[str] | None,
+            )
+        ]
+
+        for name, param in sig.parameters.items():
+            if name == "self":
+                continue
+            annotation = param.annotation if param.annotation is not inspect.Parameter.empty else str
+            default = param.default if param.default is not inspect.Parameter.empty else ...
+            parameters.append(
+                inspect.Parameter(
+                    name=name,
+                    kind=inspect.Parameter.KEYWORD_ONLY,
+                    default=Query(default),
+                    annotation=annotation,
                 )
-                return {
-                    device.name: getattr(device, cmd.__name__)() for device in selected
-                }
+            )
 
-            return handler
+        new_sig = inspect.Signature(parameters)
+
+        def make_logic(cmd):
+            def logic(**kwargs):
+                selected_names = kwargs.pop("names", None)
+                selected = (
+                    [device_lookup[name] for name in selected_names if name in device_lookup]
+                    if selected_names else device_lookup.values()
+                )
+                result = {}
+                for device in selected:
+                    method = getattr(device, cmd.__name__)
+                    result[device.name] = method(**kwargs)
+                return result
+            return logic
+
+        logic_fn = make_logic(cmd)
+
+        # ✅ Wrap with FastAPI-compatible signature
+        handler = with_signature(new_sig)(logic_fn)
 
         method = app.get if cmd_name == "status" else app.post
-        method(route)(make_handler(getattr(devices[0], cmd_name)))
-
+        method(route)(handler)
 
 """ Lights """
 lights = [Light(light["entity_id"], light["automation"]) for light in config["lights"]]
