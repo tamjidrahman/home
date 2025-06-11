@@ -3,7 +3,7 @@ import { LightCard } from "./LightCard"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { invokeCommand } from "@/lib/api"
-import { SpeakerCard } from "./SpeakerCard"
+import { MediaPlayerControllerCard } from "./MediaPlayerControllerCard"
 
 export function EntityTab({
   type,
@@ -29,10 +29,8 @@ export function EntityTab({
   }
   if (type === "speaker") {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {Object.entries(data).map(([name, state]) => (
-          <SpeakerCard key={name} name={name} state={state} refresh={refresh} />
-        ))}
+      <div className="max-w-xl mx-auto">
+        <MediaPlayerControllerCard state={data} refresh={refresh} />
       </div>
     )
   }
