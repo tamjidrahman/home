@@ -12,10 +12,20 @@ export default function HomePage() {
   const [data, setData] = useState<Record<string, Record<string, any>>>({})
   const [commands, setCommands] = useState<Record<string, string[]>>({})
   const [showRaw, setShowRaw] = useState(false)
+  const [activeTab, setActiveTab] = useState("light")
 
   useEffect(() => {
     fetchAll()
   }, [])
+
+  // Poll only the currently active tab
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshEntity(activeTab)
+    }, 2000)
+
+    return () => clearInterval(interval)
+  }, [activeTab])
 
   const fetchAll = async () => {
     const results = await Promise.allSettled(entityTypes.map(fetchDeviceStatus))
@@ -34,10 +44,8 @@ export default function HomePage() {
     setCommands(cmdMap)
   }
 
-  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
   const refreshEntity = async (type: string) => {
     try {
-      await sleep(2000)
       const result = await fetchDeviceStatus(type)
       setData(prev => ({ ...prev, [type]: result }))
     } catch (_) { }
@@ -53,7 +61,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <Tabs defaultValue="light" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="flex w-full overflow-x-auto">
           {entityTypes.map(type => (
             <TabsTrigger key={type} value={type} className="capitalize">

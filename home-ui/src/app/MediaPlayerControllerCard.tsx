@@ -1,4 +1,5 @@
-import { useState } from "react"
+"use client"
+
 import {
   Volume2, VolumeX,
   Play, Pause, SkipForward, SkipBack, StopCircle
@@ -25,25 +26,13 @@ export function MediaPlayerControllerCard({
   state: Record<string, SpeakerState>
   refresh: () => void
 }) {
-  const [localState, setLocalState] = useState(state)
-
   const handleMuteToggle = (name: string, checked: boolean) => {
-    setLocalState(prev => ({
-      ...prev,
-      [name]: { ...prev[name], is_muted: checked }
-    }))
-    invokeCommand("speaker", checked ? "volume_mute" : "volume_unmute", [name])
-      .finally(refresh)
+    invokeCommand("speaker", checked ? "volume_mute" : "volume_unmute", [name]).finally(refresh)
   }
 
   const handleVolumeChange = (name: string, value: number[]) => {
-    const newVolume = value[0]
-    setLocalState(prev => ({
-      ...prev,
-      [name]: { ...prev[name], volume: newVolume }
-    }))
-    invokeCommand("speaker", "volume_set", [name], { volume: newVolume })
-      .finally(refresh)
+    const volume = value[0]
+    invokeCommand("speaker", "volume_set", [name], { volume }).finally(refresh)
   }
 
   const handleTransport = (command: string) => {
@@ -101,7 +90,7 @@ export function MediaPlayerControllerCard({
         </div>
 
         <div className="w-full space-y-4">
-          {Object.entries(localState).map(([room, data]) => (
+          {Object.entries(state).map(([room, data]) => (
             <div key={room} className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-sm font-medium capitalize">
                 <div className="flex items-center gap-2">
