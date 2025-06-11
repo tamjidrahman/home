@@ -34,8 +34,10 @@ export default function HomePage() {
     setCommands(cmdMap)
   }
 
+  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
   const refreshEntity = async (type: string) => {
     try {
+      await sleep(2000)
       const result = await fetchDeviceStatus(type)
       setData(prev => ({ ...prev, [type]: result }))
     } catch (_) { }
