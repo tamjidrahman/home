@@ -4,8 +4,7 @@ from typing import Any
 from requests import get, post
 
 TOKEN = os.getenv("HOMEASSISTANT_TOKEN")
-
-URL = "http://homeassistant.local:8123/api"
+URL = os.getenv("HOMEASSISTANT_URL", "http://homeassistant.local:8123") + "/api"
 
 
 def get_entity_status(entity_id: str) -> dict[str, Any]:

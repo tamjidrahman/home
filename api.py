@@ -1,7 +1,7 @@
-import json
+import os
 import inspect
 from pathlib import Path
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Query
 import toml
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,7 +22,8 @@ app.add_middleware(
 )
 
 
-def load_config(config_file=Path.home() / ".config/home/config.toml"):
+def load_config():
+    config_file = os.getenv("HOME_CONFIG_PATH", Path.home() / ".config/home/config.toml")
     config_path = Path(config_file)
     if not config_path.exists():
         raise FileNotFoundError(f"Configuration file {config_file} not found.")

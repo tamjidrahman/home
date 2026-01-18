@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+venv/
+ENV/
+.pytest_cache/
+.mypy_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Frontend (not needed for API)
+home-ui/
+
+# Dev/test files
+*.md
+tests/
+.coverage
+htmlcov/
+
+# Terraform
+infra/
+*.tfstate*
+.terraform/
