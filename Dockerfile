@@ -2,15 +2,11 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install poetry
-RUN pip install --no-cache-dir poetry
-
-# Copy dependency files first for better caching
-COPY pyproject.toml poetry.lock* ./
-
-# Install dependencies (no dev dependencies, no virtualenv in container)
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --only main
+# Install dependencies directly with pip (simpler, faster builds)
+COPY pyproject.toml ./
+RUN pip install --no-cache-dir toml && \
+    python -c "import toml; c=toml.load('pyproject.toml'); print('\n'.join(f'{k}{v}' for k,v in c['tool']['poetry']['dependencies'].items() if k!='python'))" > requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY homeassistant/ ./homeassistant/
