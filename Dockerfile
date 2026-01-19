@@ -5,12 +5,12 @@ WORKDIR /app
 # Install poetry
 RUN pip install --no-cache-dir poetry
 
-# Copy dependency files first for better caching
-COPY pyproject.toml poetry.lock* ./
+# Copy dependency files
+COPY pyproject.toml poetry.lock ./
 
-# Install dependencies (no dev dependencies, no virtualenv in container)
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --only main
+# Install dependencies (no dev, no virtualenv in container)
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-interaction --no-ansi --without dev --no-root
 
 # Copy application code
 COPY homeassistant/ ./homeassistant/

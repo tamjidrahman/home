@@ -1,10 +1,13 @@
 import os
 import inspect
 from pathlib import Path
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
+from fastapi.responses import JSONResponse
 import toml
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 
+from homeassistant import client
 from homeassistant.commandable import CommandableGroup
 from homeassistant.door import Door
 from homeassistant.light import Light, LightGroup
@@ -12,7 +15,30 @@ from homeassistant.speaker import Speaker, SpeakerGroup
 from homeassistant.thermostat import Thermostat
 from homeassistant.vacuum import Vacuum
 
+
+class TokenAuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Skip auth for health check only
+        if request.url.path in ("/health", "/openapi.json"):
+            return await call_next(request)
+
+        # Require auth for everything else (including /docs, /redoc)
+        auth_header = request.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Authorization header with Bearer token required"}
+            )
+
+        # Set token for downstream use
+        token = auth_header[7:]
+        client.set_token(token)
+
+        return await call_next(request)
+
+
 app = FastAPI()
+app.add_middleware(TokenAuthMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Frontend URL (Next.js dev server)
@@ -20,6 +46,11 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc)
     allow_headers=["*"],  # Allow all headers (e.g. Authorization, Content-Type)
 )
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 def load_config():

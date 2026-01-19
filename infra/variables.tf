@@ -13,13 +13,6 @@ variable "app_name" {
 variable "homeassistant_url" {
   description = "Home Assistant URL (e.g., https://your-instance.nabu.casa)"
   type        = string
-  sensitive   = true
-}
-
-variable "homeassistant_token" {
-  description = "Home Assistant Long-Lived Access Token"
-  type        = string
-  sensitive   = true
 }
 
 variable "cpu" {
@@ -32,4 +25,10 @@ variable "memory" {
   description = "Memory in MB for App Runner (512, 1024, 2048, 3072, 4096, etc.)"
   type        = string
   default     = "512"
+}
+
+variable "custom_domain" {
+  description = "Custom domain for the API (e.g., api.home.example.com). Leave empty to skip."
+  type        = string
+  default     = ""
 }

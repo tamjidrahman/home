@@ -5,8 +5,8 @@ aws_region = "us-east-1"
 app_name   = "home-api"
 
 # Home Assistant configuration
-homeassistant_url   = "https://your-instance.ui.nabu.casa"
-homeassistant_token = "your-long-lived-access-token"
+# Note: Token is NOT stored here - it must be passed per-request via Authorization header
+homeassistant_url = "https://your-instance.ui.nabu.casa"
 
 # Optional: adjust resources (smallest/cheapest defaults)
 # cpu    = "256"

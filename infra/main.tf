@@ -60,8 +60,7 @@ resource "aws_apprunner_service" "home_api" {
       image_configuration {
         port = "8000"
         runtime_environment_variables = {
-          HOMEASSISTANT_URL  = var.homeassistant_url
-          HOMEASSISTANT_TOKEN = var.homeassistant_token
+          HOMEASSISTANT_URL = var.homeassistant_url
         }
       }
       image_identifier      = "${aws_ecr_repository.home_api.repository_url}:latest"
@@ -78,7 +77,7 @@ resource "aws_apprunner_service" "home_api" {
 
   health_check_configuration {
     protocol            = "HTTP"
-    path                = "/light/commands"
+    path                = "/health"
     healthy_threshold   = 2
     unhealthy_threshold = 3
     interval            = 10
@@ -88,4 +87,13 @@ resource "aws_apprunner_service" "home_api" {
     Application = var.app_name
     ManagedBy   = "terraform"
   }
+}
+
+# Custom domain association
+resource "aws_apprunner_custom_domain_association" "home_api" {
+  count = var.custom_domain != "" ? 1 : 0
+
+  domain_name          = var.custom_domain
+  service_arn          = aws_apprunner_service.home_api.arn
+  enable_www_subdomain = false
 }
