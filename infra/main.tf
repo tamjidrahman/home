@@ -88,3 +88,12 @@ resource "aws_apprunner_service" "home_api" {
     ManagedBy   = "terraform"
   }
 }
+
+# Custom domain association
+resource "aws_apprunner_custom_domain_association" "home_api" {
+  count = var.custom_domain != "" ? 1 : 0
+
+  domain_name          = var.custom_domain
+  service_arn          = aws_apprunner_service.home_api.arn
+  enable_www_subdomain = false
+}

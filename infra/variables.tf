@@ -26,3 +26,9 @@ variable "memory" {
   type        = string
   default     = "512"
 }
+
+variable "custom_domain" {
+  description = "Custom domain for the API (e.g., api.home.example.com). Leave empty to skip."
+  type        = string
+  default     = ""
+}
