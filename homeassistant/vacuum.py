@@ -1,18 +1,24 @@
 import enum
+from functools import cache
 
 import homeassistant.client as client
 from homeassistant.commandable import Commandable
 
-status = client.get_entity_status("vacuum.x40_ultra")
-map = status["attributes"]["rooms"]["Map 1"]
 
-names = {}
-room_ids = {}
+@cache
+def get_room_data(entity_id: str):
+    """Lazily fetch room data from vacuum."""
+    status = client.get_entity_status(entity_id)
+    room_map = status["attributes"]["rooms"]["Map 1"]
 
-for room in map:
-    names[room["name"]] = room["name"]
-    room_ids[room["name"]] = room["id"]
-Room = enum.Enum("Room", names)
+    names = {}
+    room_ids = {}
+    for room in room_map:
+        names[room["name"]] = room["name"]
+        room_ids[room["name"]] = room["id"]
+
+    Room = enum.Enum("Room", names)
+    return Room, room_ids
 
 
 class Vacuum(Commandable):
@@ -49,13 +55,14 @@ class Vacuum(Commandable):
         """Stop the vacuum."""
         client.command_service("vacuum", "stop", {"entity_id": self.entity_id})
 
-    def clean_room(self, rooms: list[Room]):
+    def clean_room(self, rooms: list[str]):
         """Clean the specified rooms."""
+        _, room_ids = get_room_data(self.entity_id)
         client.command_service(
             "dreame_vacuum",
             "vacuum_clean_segment",
             {
                 "entity_id": self.entity_id,
-                "segments": [room_ids[room.value] for room in rooms],
+                "segments": [room_ids[room] for room in rooms],
             },
         )
