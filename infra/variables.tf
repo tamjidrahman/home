@@ -13,13 +13,6 @@ variable "app_name" {
 variable "homeassistant_url" {
   description = "Home Assistant URL (e.g., https://your-instance.nabu.casa)"
   type        = string
-  sensitive   = true
-}
-
-variable "homeassistant_token" {
-  description = "Home Assistant Long-Lived Access Token"
-  type        = string
-  sensitive   = true
 }
 
 variable "cpu" {
