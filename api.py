@@ -18,26 +18,23 @@ from homeassistant.vacuum import Vacuum
 
 class TokenAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Skip auth for health check
-        if request.url.path == "/health":
+        # Skip auth for health check only
+        if request.url.path in ("/health", "/openapi.json"):
             return await call_next(request)
 
-        # Extract token from Authorization header (Bearer token)
+        # Require auth for everything else (including /docs, /redoc)
         auth_header = request.headers.get("Authorization", "")
-        if auth_header.startswith("Bearer "):
-            token = auth_header[7:]
-            client.set_token(token)
+        if not auth_header.startswith("Bearer "):
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Authorization header with Bearer token required"}
+            )
 
-        try:
-            response = await call_next(request)
-            return response
-        except ValueError as e:
-            if "No Home Assistant token" in str(e):
-                return JSONResponse(
-                    status_code=401,
-                    content={"detail": "Authorization header with Bearer token required"}
-                )
-            raise
+        # Set token for downstream use
+        token = auth_header[7:]
+        client.set_token(token)
+
+        return await call_next(request)
 
 
 app = FastAPI()
