@@ -4,13 +4,14 @@ import { useEffect, useState } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { EntityTab } from "./EntityTab"
-import { fetchDeviceStatus, fetchDeviceCommands } from "@/lib/api"
+import { TokenSettings } from "./TokenSettings"
+import { fetchDeviceStatus, fetchDeviceCommands, type Command } from "@/lib/api"
 
 const entityTypes = ["light", "speaker", "thermostat", "vacuum", "door"]
 
 export default function HomePage() {
   const [data, setData] = useState<Record<string, Record<string, any>>>({})
-  const [commands, setCommands] = useState<Record<string, string[]>>({})
+  const [commands, setCommands] = useState<Record<string, Command[]>>({})
   const [showRaw, setShowRaw] = useState(false)
   const [activeTab, setActiveTab] = useState("light")
 
@@ -28,8 +29,8 @@ export default function HomePage() {
   }, [activeTab])
 
   const fetchAll = async () => {
-    const results = await Promise.allSettled(entityTypes.map(fetchDeviceStatus))
-    const commandsResults = await Promise.allSettled(entityTypes.map(fetchDeviceCommands))
+    const results = await Promise.allSettled(entityTypes.map((t) => fetchDeviceStatus(t)))
+    const commandsResults = await Promise.allSettled(entityTypes.map((t) => fetchDeviceCommands(t)))
 
     const combined: Record<string, any> = {}
     results.forEach((res, i) => {
@@ -37,7 +38,7 @@ export default function HomePage() {
     })
     setData(combined)
 
-    const cmdMap: Record<string, string[]> = {}
+    const cmdMap: Record<string, Command[]> = {}
     commandsResults.forEach((res, i) => {
       if (res.status === "fulfilled") cmdMap[entityTypes[i]] = res.value
     })
@@ -58,6 +59,7 @@ export default function HomePage() {
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           Raw JSON
           <Switch checked={showRaw} onCheckedChange={setShowRaw} />
+          <TokenSettings onChange={fetchAll} />
         </div>
       </div>
 

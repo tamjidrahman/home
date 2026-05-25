@@ -1,0 +1,25 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # Must be resolvable from inside the container (containers don't do mDNS,
+      # so homeassistant.local won't work — use an IP or a routable hostname).
+      HOMEASSISTANT_URL: ${HOMEASSISTANT_URL:-http://homeassistant.local:8123}
+    volumes:
+      - ./config.toml:/app/config.toml:ro
+
+  ui:
+    build:
+      context: ./home-ui
+      dockerfile: Dockerfile
+      args:
+        # Browser-reachable URL (fetches run client-side, so must resolve from the browser's host)
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api

@@ -1,6 +1,12 @@
+import { authHeaders } from "./auth";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.basha.cloud";
+
 export async function fetchDeviceStatus(type: string, names?: string[]) {
   const params = names?.length ? `?${type}=${names.join(",")}` : "";
-  const res = await fetch(`https://api.basha.cloud/${type}/status${params}`);
+  const res = await fetch(`${API_URL}/${type}/status${params}`, {
+    headers: authHeaders(),
+  });
   if (!res.ok) throw new Error(`Failed to fetch ${type} status`);
   return res.json();
 }
@@ -23,15 +29,29 @@ export async function invokeCommand(
     query.set(key, String(value));
   }
 
-  const res = await fetch(`https://api.basha.cloud/${type}/${command}?${query.toString()}`, {
+  const res = await fetch(`${API_URL}/${type}/${command}?${query.toString()}`, {
     method: "POST",
+    headers: authHeaders(),
   });
 
   if (!res.ok) throw new Error(`Failed to invoke ${command}`);
   return res.json();
 }
-export async function fetchDeviceCommands(type: string): Promise<string[]> {
-  const res = await fetch(`https://api.basha.cloud/${type}/commands`)
+export type CommandParam = {
+  name: string
+  type: "number" | "string" | "boolean"
+  default: string | number | boolean | null
+}
+
+export type Command = {
+  name: string
+  params: CommandParam[]
+}
+
+export async function fetchDeviceCommands(type: string): Promise<Command[]> {
+  const res = await fetch(`${API_URL}/${type}/commands`, {
+    headers: authHeaders(),
+  })
   if (!res.ok) return []
   return res.json()
 }

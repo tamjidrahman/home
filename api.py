@@ -66,13 +66,27 @@ config = load_config()
 
 from makefun import create_function, with_signature
 
+_TYPE_MAP = {int: "number", float: "number", bool: "boolean", str: "string"}
+
+
+def _describe_params(cmd):
+    params = []
+    for name, param in inspect.signature(cmd).parameters.items():
+        if name == "self":
+            continue
+        type_str = _TYPE_MAP.get(param.annotation, "string")
+        default = param.default if param.default is not inspect.Parameter.empty else None
+        params.append({"name": name, "type": type_str, "default": default})
+    return params
+
+
 def register_routes(entity_name: str, devices, app: FastAPI):
     device_lookup = {device.name: device for device in devices}
     commands = [cmd for cmd in devices[0].get_commands()]  # assume uniform
 
     @app.get(f"/{entity_name}/commands")
     def get_commands():
-        return [cmd.__name__ for cmd in commands]
+        return [{"name": cmd.__name__, "params": _describe_params(cmd)} for cmd in commands]
 
     for cmd in commands:
         cmd_name = cmd.__name__
