@@ -18,8 +18,46 @@ services:
       dockerfile: Dockerfile
       args:
         # Browser-reachable URL (fetches run client-side, so must resolve from the browser's host)
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://home.basha.cloud/api}
     ports:
       - "3000:3000"
     depends_on:
       - api
+
+  caddy:
+    build:
+      context: ./infra/caddy
+      dockerfile: Dockerfile
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - ui
+      - api
+    restart: unless-stopped
+
+  tailscale-home:
+    image: tailscale/tailscale:latest
+    hostname: home
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY}
+      TS_HOSTNAME: home
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_SERVE_CONFIG: /config/serve.json
+      TS_USERSPACE: "true"
+    volumes:
+      - tailscale-home-state:/var/lib/tailscale
+      - ./infra/tailscale/home-serve.json:/config/serve.json:ro
+    depends_on:
+      - caddy
+    restart: unless-stopped
+
+volumes:
+  tailscale-home-state:
+  caddy-data:
+  caddy-config:

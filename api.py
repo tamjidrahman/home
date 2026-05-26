@@ -16,6 +16,19 @@ from homeassistant.thermostat import Thermostat
 from homeassistant.vacuum import Vacuum
 
 
+class StripApiPrefixMiddleware(BaseHTTPMiddleware):
+    # Tailscale serve forwards the full path to the backend, so requests sent to
+    # https://home.tail2318fb.ts.net/api/foo arrive here as /api/foo. Strip it
+    # so existing routes (mounted at /) still match.
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+        if path == "/api" or path.startswith("/api/"):
+            new_path = path[len("/api"):] or "/"
+            request.scope["path"] = new_path
+            request.scope["raw_path"] = new_path.encode()
+        return await call_next(request)
+
+
 class TokenAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Skip auth for health check only
@@ -46,6 +59,8 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc)
     allow_headers=["*"],  # Allow all headers (e.g. Authorization, Content-Type)
 )
+# Added last so it runs first (outermost) — must strip /api before routing/auth.
+app.add_middleware(StripApiPrefixMiddleware)
 
 
 @app.get("/health")
