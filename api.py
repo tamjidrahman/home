@@ -31,11 +31,11 @@ class StripApiPrefixMiddleware(BaseHTTPMiddleware):
 
 class TokenAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Skip auth for health check only
-        if request.url.path in ("/health", "/openapi.json"):
+        # Schema + docs are public — /openapi.json already exposes the full
+        # surface, so locking the rendered UIs adds no security.
+        if request.url.path in ("/health", "/openapi.json", "/docs", "/redoc"):
             return await call_next(request)
 
-        # Require auth for everything else (including /docs, /redoc)
         auth_header = request.headers.get("Authorization", "")
         if not auth_header.startswith("Bearer "):
             return JSONResponse(
