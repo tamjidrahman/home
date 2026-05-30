@@ -1,5 +1,6 @@
 import os
 import inspect
+from enum import Enum
 from pathlib import Path
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import JSONResponse
@@ -99,6 +100,14 @@ def register_routes(entity_name: str, devices, app: FastAPI):
     device_lookup = {device.name: device for device in devices}
     commands = [cmd for cmd in devices[0].get_commands()]  # assume uniform
 
+    # Built at server start so /docs renders a dropdown of valid names per
+    # entity instead of a free-form string list.
+    names_enum = Enum(
+        f"{entity_name.capitalize()}Name",
+        {n: n for n in device_lookup},
+        type=str,
+    )
+
     @app.get(f"/{entity_name}/commands", tags=[entity_name])
     def get_commands():
         return [{"name": cmd.__name__, "params": _describe_params(cmd)} for cmd in commands]
@@ -113,7 +122,7 @@ def register_routes(entity_name: str, devices, app: FastAPI):
                 name="names",
                 kind=inspect.Parameter.KEYWORD_ONLY,
                 default=Query(None, alias=entity_name),
-                annotation=list[str] | None,
+                annotation=list[names_enum] | None,
             )
         ]
 
@@ -136,8 +145,10 @@ def register_routes(entity_name: str, devices, app: FastAPI):
         def make_logic(cmd):
             def logic(**kwargs):
                 selected_names = kwargs.pop("names", None)
+                # names_enum members are str subclasses, but use .value to be
+                # explicit when looking them up in device_lookup.
                 selected = (
-                    [device_lookup[name] for name in selected_names if name in device_lookup]
+                    [device_lookup[n.value] for n in selected_names if n.value in device_lookup]
                     if selected_names else device_lookup.values()
                 )
                 result = {}
