@@ -1,0 +1,24 @@
+name: Deploy home stack
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: home-server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write .env from secrets
+        run: |
+          cat > .env <<EOF
+          HOMEASSISTANT_URL=${{ secrets.HOMEASSISTANT_URL }}
+          SERVICE_HOMEASSISTANT_TOKEN=${{ secrets.SERVICE_HOMEASSISTANT_TOKEN }}
+          NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+          EOF
+
+      - name: Build and deploy
+        run: docker compose -p home up -d --build --remove-orphans
