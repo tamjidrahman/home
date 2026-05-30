@@ -17,7 +17,9 @@ def get_room_data(entity_id: str):
         names[room["name"]] = room["name"]
         room_ids[room["name"]] = room["id"]
 
-    Room = enum.Enum("Room", names)
+    # type=str so members are str subclasses — lets FastAPI render a
+    # dropdown for them and lets clean_room look them up in room_ids by value.
+    Room = enum.Enum("Room", names, type=str)
     return Room, room_ids
 
 

@@ -14,7 +14,7 @@ from homeassistant.door import Door
 from homeassistant.light import Light, LightGroup
 from homeassistant.speaker import Speaker, SpeakerGroup
 from homeassistant.thermostat import Thermostat
-from homeassistant.vacuum import Vacuum
+from homeassistant.vacuum import Vacuum, get_room_data
 
 
 class StripApiPrefixMiddleware(BaseHTTPMiddleware):
@@ -96,7 +96,8 @@ def _describe_params(cmd):
     return params
 
 
-def register_routes(entity_name: str, devices, app: FastAPI):
+def register_routes(entity_name: str, devices, app: FastAPI, param_overrides: dict | None = None):
+    param_overrides = param_overrides or {}
     device_lookup = {device.name: device for device in devices}
     commands = [cmd for cmd in devices[0].get_commands()]  # assume uniform
 
@@ -129,7 +130,10 @@ def register_routes(entity_name: str, devices, app: FastAPI):
         for name, param in sig.parameters.items():
             if name == "self":
                 continue
-            annotation = param.annotation if param.annotation is not inspect.Parameter.empty else str
+            if name in param_overrides:
+                annotation = param_overrides[name]
+            else:
+                annotation = param.annotation if param.annotation is not inspect.Parameter.empty else str
             default = param.default if param.default is not inspect.Parameter.empty else ...
             parameters.append(
                 inspect.Parameter(
@@ -180,7 +184,16 @@ register_routes("thermostat", thermostats, app)
 
 """ Vacuum """
 vacuums = [Vacuum(config["vacuum"]["entity_id"])]
-register_routes("vacuum", vacuums, app)
+# Try to type clean_room's `rooms` arg as the live Room enum so /docs gets
+# a dropdown. Needs SERVICE_HOMEASSISTANT_TOKEN to be set in the api container
+# env; falls back to list[str] if it's missing or HA is unreachable at boot.
+vacuum_overrides = {}
+try:
+    Room, _ = get_room_data(vacuums[0].entity_id)
+    vacuum_overrides["rooms"] = list[Room]
+except Exception as e:
+    print(f"warning: could not build vacuum Room enum at startup ({e}); falling back to list[str]")
+register_routes("vacuum", vacuums, app, param_overrides=vacuum_overrides)
 
 """ Doors """
 doors = [Door(d["entity_id"], lock_id=d.get("lock_id")) for d in config["doors"]]

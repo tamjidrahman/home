@@ -9,6 +9,10 @@ services:
       # Must be resolvable from inside the container (containers don't do mDNS,
       # so homeassistant.local won't work — use an IP or a routable hostname).
       HOMEASSISTANT_URL: ${HOMEASSISTANT_URL:-http://homeassistant.local:8123}
+      # Long-lived HA token used only at server startup to fetch vacuum room
+      # metadata so /docs can render a Room dropdown. Per-request auth still
+      # comes from the bearer the client sends.
+      SERVICE_HOMEASSISTANT_TOKEN: ${SERVICE_HOMEASSISTANT_TOKEN:-}
     volumes:
       - ./config.toml:/app/config.toml:ro
     restart: unless-stopped

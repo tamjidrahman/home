@@ -4,8 +4,9 @@ from typing import Any
 
 from requests import get, post
 
-# Context variable for per-request token (used by API)
-# Falls back to env var for CLI usage
+# Context variable for per-request token (used by API). Falls back to
+# SERVICE_HOMEASSISTANT_TOKEN — a long-lived service token used for CLI
+# usage and at API server startup before any request has set the context.
 _token_context: ContextVar[str | None] = ContextVar("ha_token", default=None)
 
 URL = os.getenv("HOMEASSISTANT_URL", "http://homeassistant.local:8123") + "/api"
@@ -17,8 +18,8 @@ def set_token(token: str):
 
 
 def get_token() -> str | None:
-    """Get token from context or fall back to env var."""
-    return _token_context.get() or os.getenv("HOMEASSISTANT_TOKEN")
+    """Get token from context or fall back to the service env var."""
+    return _token_context.get() or os.getenv("SERVICE_HOMEASSISTANT_TOKEN")
 
 
 def get_entity_status(entity_id: str) -> dict[str, Any]:
