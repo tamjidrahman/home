@@ -119,42 +119,68 @@ function CommandControl({
     })
   }
 
+  const hasChoiceParam = command.params.some(p => p.choices && p.multi)
+
+  // Choice params get their own row above the go button so the toggle
+  // buttons don't visually mix with the action button.
+  if (hasChoiceParam) {
+    return (
+      <div className="flex flex-col gap-2 rounded border border-border px-2 py-2">
+        <span className="text-sm">{command.name}</span>
+        {command.params.map(p => {
+          if (p.choices && p.multi) {
+            const selected = Array.isArray(values[p.name]) ? (values[p.name] as string[]) : []
+            return (
+              <div key={p.name} className="flex flex-wrap gap-1">
+                {p.choices.map(choice => {
+                  const isOn = selected.includes(choice)
+                  return (
+                    <Button
+                      key={choice}
+                      variant={isOn ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => toggleChoice(p.name, choice)}
+                    >
+                      {choice}
+                    </Button>
+                  )
+                })}
+              </div>
+            )
+          }
+          return (
+            <input
+              key={p.name}
+              type={p.type === "number" ? "number" : "text"}
+              placeholder={p.name + (p.default != null ? ` (${p.default})` : "")}
+              value={typeof values[p.name] === "string" ? (values[p.name] as string) : ""}
+              onChange={e => setValues(prev => ({ ...prev, [p.name]: e.target.value }))}
+              onKeyDown={e => e.key === "Enter" && invoke()}
+              className="w-24 rounded border border-input bg-background px-2 py-1 text-sm"
+            />
+          )
+        })}
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={invoke}>go</Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-2 rounded border border-border px-2 py-1">
       <span className="text-sm">{command.name}</span>
-      {command.params.map(p => {
-        if (p.choices && p.multi) {
-          const selected = Array.isArray(values[p.name]) ? (values[p.name] as string[]) : []
-          return (
-            <div key={p.name} className="flex flex-wrap items-center gap-1">
-              {p.choices.map(choice => {
-                const isOn = selected.includes(choice)
-                return (
-                  <Button
-                    key={choice}
-                    variant={isOn ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => toggleChoice(p.name, choice)}
-                  >
-                    {choice}
-                  </Button>
-                )
-              })}
-            </div>
-          )
-        }
-        return (
-          <input
-            key={p.name}
-            type={p.type === "number" ? "number" : "text"}
-            placeholder={p.name + (p.default != null ? ` (${p.default})` : "")}
-            value={typeof values[p.name] === "string" ? (values[p.name] as string) : ""}
-            onChange={e => setValues(prev => ({ ...prev, [p.name]: e.target.value }))}
-            onKeyDown={e => e.key === "Enter" && invoke()}
-            className="w-24 rounded border border-input bg-background px-2 py-1 text-sm"
-          />
-        )
-      })}
+      {command.params.map(p => (
+        <input
+          key={p.name}
+          type={p.type === "number" ? "number" : "text"}
+          placeholder={p.name + (p.default != null ? ` (${p.default})` : "")}
+          value={typeof values[p.name] === "string" ? (values[p.name] as string) : ""}
+          onChange={e => setValues(prev => ({ ...prev, [p.name]: e.target.value }))}
+          onKeyDown={e => e.key === "Enter" && invoke()}
+          className="w-24 rounded border border-input bg-background px-2 py-1 text-sm"
+        />
+      ))}
       <Button variant="outline" size="sm" onClick={invoke}>go</Button>
     </div>
   )
