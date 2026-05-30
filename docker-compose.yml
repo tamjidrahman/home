@@ -1,8 +1,17 @@
+# Pinned so the project/network/container names don't depend on the
+# directory the compose command runs from (matters for the CI runner,
+# whose workspace path != /home/tamjid/src/home).
+name: home
+
 services:
   api:
     build:
       context: .
       dockerfile: Dockerfile
+    # CI sets TAG=<commit-sha>; local dev gets :latest. With both build
+    # and image set, `docker compose build` tags with the image name and
+    # `docker compose push` pushes to the Forgejo registry.
+    image: git.basha.cloud/tamjid/home-api:${TAG:-latest}
     ports:
       - "8000:8000"
     environment:
@@ -24,6 +33,7 @@ services:
       args:
         # Browser-reachable URL (fetches run client-side, so must resolve from the browser's host)
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.basha.cloud}
+    image: git.basha.cloud/tamjid/home-ui:${TAG:-latest}
     ports:
       - "3000:3000"
     depends_on:

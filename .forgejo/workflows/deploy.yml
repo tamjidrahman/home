@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: home-server
+    env:
+      TAG: ${{ github.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,7 +20,24 @@ jobs:
           HOMEASSISTANT_URL=${{ secrets.HOMEASSISTANT_URL }}
           SERVICE_HOMEASSISTANT_TOKEN=${{ secrets.SERVICE_HOMEASSISTANT_TOKEN }}
           NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+          TAG=$TAG
           EOF
 
-      - name: Build and deploy
-        run: docker compose -p home up -d --build --remove-orphans
+      - name: Log in to Forgejo container registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+            | docker login git.basha.cloud -u "${{ github.actor }}" --password-stdin
+
+      - name: Build images
+        run: docker compose build
+
+      - name: Push :${{ github.sha }} and :latest
+        run: |
+          docker compose push
+          for service in home-api home-ui; do
+            docker tag "git.basha.cloud/tamjid/$service:$TAG" "git.basha.cloud/tamjid/$service:latest"
+            docker push "git.basha.cloud/tamjid/$service:latest"
+          done
+
+      - name: Deploy
+        run: docker compose up -d --remove-orphans
