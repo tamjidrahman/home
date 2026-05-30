@@ -99,7 +99,7 @@ def register_routes(entity_name: str, devices, app: FastAPI):
     device_lookup = {device.name: device for device in devices}
     commands = [cmd for cmd in devices[0].get_commands()]  # assume uniform
 
-    @app.get(f"/{entity_name}/commands")
+    @app.get(f"/{entity_name}/commands", tags=[entity_name])
     def get_commands():
         return [{"name": cmd.__name__, "params": _describe_params(cmd)} for cmd in commands]
 
@@ -153,7 +153,7 @@ def register_routes(entity_name: str, devices, app: FastAPI):
         handler = with_signature(new_sig)(logic_fn)
 
         method = app.get if cmd_name == "status" else app.post
-        method(route)(handler)
+        method(route, tags=[entity_name])(handler)
 
 """ Lights """
 lights = [Light(light["entity_id"], light["automation"]) for light in config["lights"]]
