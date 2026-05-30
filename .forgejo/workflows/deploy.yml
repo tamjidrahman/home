@@ -24,9 +24,11 @@ jobs:
           EOF
 
       - name: Log in to Forgejo container registry
+        # Auto-provided GITHUB_TOKEN doesn't have write:package rights to
+        # user-owned packages, so use a dedicated PAT stored as a repo secret.
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" \
-            | docker login git.basha.cloud -u "${{ github.actor }}" --password-stdin
+          echo "${{ secrets.REGISTRY_TOKEN }}" \
+            | docker login git.basha.cloud -u tamjid --password-stdin
 
       - name: Build images
         run: docker compose build
