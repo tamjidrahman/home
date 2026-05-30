@@ -185,3 +185,30 @@ register_routes("vacuum", vacuums, app)
 """ Doors """
 doors = [Door(d["entity_id"], lock_id=d.get("lock_id")) for d in config["doors"]]
 register_routes("door", doors, app)
+
+
+# Tell Swagger / Redoc about the bearer scheme the TokenAuthMiddleware
+# enforces, so /docs shows the Authorize button and "Try it out" sends
+# the token. The middleware still does the actual check.
+from fastapi.openapi.utils import get_openapi
+
+_PUBLIC_PATHS = {"/health", "/openapi.json", "/docs", "/redoc"}
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    schema = get_openapi(title=app.title, version=app.version, routes=app.routes)
+    schema.setdefault("components", {})["securitySchemes"] = {
+        "BearerAuth": {"type": "http", "scheme": "bearer"}
+    }
+    for path, methods in schema["paths"].items():
+        if path in _PUBLIC_PATHS:
+            continue
+        for op in methods.values():
+            op.setdefault("security", []).append({"BearerAuth": []})
+    app.openapi_schema = schema
+    return schema
+
+
+app.openapi = custom_openapi
