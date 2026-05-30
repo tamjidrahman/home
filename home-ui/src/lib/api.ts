@@ -15,7 +15,7 @@ export async function invokeCommand(
   type: string,
   command: string,
   names?: string[],
-  params: Record<string, string | number | boolean> = {}
+  params: Record<string, string | number | boolean | string[]> = {}
 ) {
   const query = new URLSearchParams();
 
@@ -24,9 +24,14 @@ export async function invokeCommand(
     query.set(type, names.join(","));
   }
 
-  // Add additional arbitrary params
+  // Array values become repeated query params (?rooms=A&rooms=B) for
+  // FastAPI list[...] params; scalars stay as a single key=value.
   for (const [key, value] of Object.entries(params)) {
-    query.set(key, String(value));
+    if (Array.isArray(value)) {
+      for (const v of value) query.append(key, String(v));
+    } else {
+      query.set(key, String(value));
+    }
   }
 
   const res = await fetch(`${API_URL}/${type}/${command}?${query.toString()}`, {
@@ -41,6 +46,8 @@ export type CommandParam = {
   name: string
   type: "number" | "string" | "boolean"
   default: string | number | boolean | null
+  choices?: string[]
+  multi?: boolean
 }
 
 export type Command = {

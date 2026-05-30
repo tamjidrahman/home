@@ -2,6 +2,7 @@ import os
 import inspect
 from enum import Enum
 from pathlib import Path
+from typing import get_args, get_origin
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import JSONResponse
 import toml
@@ -70,13 +71,27 @@ from makefun import create_function, with_signature
 _TYPE_MAP = {int: "number", float: "number", bool: "boolean", str: "string"}
 
 
-def _describe_params(cmd):
+def _describe_params(cmd, param_overrides=None):
+    param_overrides = param_overrides or {}
     params = []
     for name, param in inspect.signature(cmd).parameters.items():
         if name == "self":
             continue
-        type_str = _TYPE_MAP.get(param.annotation, "string")
+        annotation = param_overrides.get(name, param.annotation)
         default = param.default if param.default is not inspect.Parameter.empty else None
+        # list[SomeEnum] from param_overrides becomes a multi-select with choices.
+        if get_origin(annotation) is list:
+            (inner,) = get_args(annotation) or (str,)
+            if isinstance(inner, type) and issubclass(inner, Enum):
+                params.append({
+                    "name": name,
+                    "type": "string",
+                    "default": default,
+                    "choices": [e.value for e in inner],
+                    "multi": True,
+                })
+                continue
+        type_str = _TYPE_MAP.get(annotation, "string")
         params.append({"name": name, "type": type_str, "default": default})
     return params
 
@@ -96,7 +111,7 @@ def register_routes(entity_name: str, devices, app: FastAPI, param_overrides: di
 
     @app.get(f"/{entity_name}/commands", tags=[entity_name])
     def get_commands():
-        return [{"name": cmd.__name__, "params": _describe_params(cmd)} for cmd in commands]
+        return [{"name": cmd.__name__, "params": _describe_params(cmd, param_overrides)} for cmd in commands]
 
     for cmd in commands:
         cmd_name = cmd.__name__
